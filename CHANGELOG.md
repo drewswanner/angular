@@ -10,7 +10,6 @@
 * **compiler:** Propagate value span of ExpressionBinding to ParsedProperty ([#36133](https://github.com/angular/angular/issues/36133)) ([2ce5fa3](https://github.com/angular/angular/commit/2ce5fa3))
 
 
-
 <a name="9.1.0-rc.0"></a>
 # [9.1.0-rc.0](https://github.com/angular/angular/compare/9.1.0-next.5...9.1.0-rc.0) (2020-03-19)
 
