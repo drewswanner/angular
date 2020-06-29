@@ -4,15 +4,21 @@ load("@npm_bazel_typescript//:index.bzl", "ts_library")
 ts_library(
     name = "commit-message",
     srcs = [
+        "cli.ts",
         "config.ts",
         "validate.ts",
+        "validate-file.ts",
+        "validate-range.ts",
     ],
     module_name = "@angular/dev-infra-private/commit-message",
     visibility = ["//dev-infra:__subpackages__"],
     deps = [
-        "//dev-infra/utils:config",
+        "//dev-infra/utils",
         "@npm//@types/node",
-        "@npm//tslib",
+        "@npm//@types/shelljs",
+        "@npm//@types/yargs",
+        "@npm//shelljs",
+        "@npm//yargs",
     ],
 )
 
@@ -22,10 +28,11 @@ ts_library(
     srcs = ["validate.spec.ts"],
     deps = [
         ":commit-message",
-        "//dev-infra/utils:config",
+        "//dev-infra/utils",
         "@npm//@types/events",
         "@npm//@types/jasmine",
         "@npm//@types/node",
+        "@npm//inquirer",
     ],
 )
 

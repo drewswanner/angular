@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
@@ -66,7 +66,7 @@ export type CreateTaskCompletedCallback = (taskQueue: TaskQueue) => TaskComplete
  * A function to be called once a task has been processed.
  */
 export type TaskCompletedCallback =
-    (task: Task, outcome: TaskProcessingOutcome, message: string | null) => void;
+    (task: Task, outcome: TaskProcessingOutcome, message: string|null) => void;
 
 /**
  * Represents the outcome of processing a `Task`.
@@ -108,7 +108,7 @@ export interface TaskQueue {
    *
    * @param task The task to mark as completed.
    */
-  markTaskCompleted(task: Task): void;
+  markAsCompleted(task: Task): void;
 
   /**
    * Mark a task as failed.
@@ -116,6 +116,16 @@ export interface TaskQueue {
    * Do not process the tasks that depend upon the given task.
    */
   markAsFailed(task: Task): void;
+
+  /**
+   * Mark a task as not processed (i.e. add an in-progress task back to the queue).
+   *
+   * This removes the task from the internal list of in-progress tasks and adds it back to the list
+   * of pending tasks.
+   *
+   * @param task The task to mark as not processed.
+   */
+  markAsUnprocessed(task: Task): void;
 
   /**
    * Return a string representation of the task queue (for debugging purposes).

@@ -1,18 +1,19 @@
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import {SourceMapConverter, fromObject, generateMapFileComment} from 'convert-source-map';
+import {fromObject, generateMapFileComment, SourceMapConverter} from 'convert-source-map';
 import MagicString from 'magic-string';
 import * as ts from 'typescript';
-import {FileSystem, absoluteFromSourceFile, basename, absoluteFrom} from '../../../src/ngtsc/file_system';
+
+import {absoluteFrom, absoluteFromSourceFile, basename, FileSystem} from '../../../src/ngtsc/file_system';
+import {Logger} from '../../../src/ngtsc/logging';
+import {RawSourceMap, SourceFileLoader} from '../../../src/ngtsc/sourcemaps';
+
 import {FileToWrite} from './utils';
-import {SourceFileLoader} from '../sourcemaps/source_file_loader';
-import {RawSourceMap} from '../sourcemaps/raw_source_map';
-import {Logger} from '../logging/logger';
 
 export interface SourceMapInfo {
   source: string;
@@ -34,14 +35,22 @@ export function renderSourceAndMap(
       {file: generatedPath, source: generatedPath, includeContent: true});
 
   try {
-    const loader = new SourceFileLoader(fs);
+    const loader = new SourceFileLoader(fs, logger, {});
     const generatedFile = loader.loadSourceFile(
         generatedPath, generatedContent, {map: generatedMap, mapPath: generatedMapPath});
 
     const rawMergedMap: RawSourceMap = generatedFile.renderFlattenedSourceMap();
     const mergedMap = fromObject(rawMergedMap);
-    if (generatedFile.sources[0]?.inline) {
-      // The input source-map was inline so make the output one inline too.
+    const firstSource = generatedFile.sources[0];
+    if (firstSource && (firstSource.rawMap !== null || !sourceFile.isDeclarationFile) &&
+        firstSource.inline) {
+      // We render an inline source map if one of:
+      // * there was no input source map and this is not a typings file;
+      // * the input source map exists and was inline.
+      //
+      // We do not generate inline source maps for typings files unless there explicitly was one in
+      // the input file because these inline source maps can be very large and it impacts on the
+      // performance of IDEs that need to read them to provide intellisense etc.
       return [
         {path: generatedPath, contents: `${generatedFile.contents}\n${mergedMap.toComment()}`}
       ];
@@ -53,8 +62,8 @@ export function renderSourceAndMap(
       ];
     }
   } catch (e) {
-    logger.error(
-        `Error when flattening the source-map "${generatedMapPath}" for "${generatedPath}": ${e.toString()}`);
+    logger.error(`Error when flattening the source-map "${generatedMapPath}" for "${
+        generatedPath}": ${e.toString()}`);
     return [
       {path: generatedPath, contents: generatedContent},
       {path: generatedMapPath, contents: fromObject(generatedMap).toJSON()},

@@ -1,6 +1,6 @@
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
@@ -30,10 +30,10 @@ function getPreamble(original: string) {
  *   list of statements as their body.
  */
 export function getAngularEmitterTransformFactory(
-    generatedFiles: Map<string, GeneratedFile>, program: ts.Program): () =>
-    (sourceFile: ts.SourceFile) => ts.SourceFile {
+    generatedFiles: Map<string, GeneratedFile>, program: ts.Program,
+    annotateForClosureCompiler: boolean): () => (sourceFile: ts.SourceFile) => ts.SourceFile {
   return function() {
-    const emitter = new TypeScriptNodeEmitter();
+    const emitter = new TypeScriptNodeEmitter(annotateForClosureCompiler);
     return function(sourceFile: ts.SourceFile): ts.SourceFile {
       const g = generatedFiles.get(sourceFile.fileName);
       const orig = g && program.getSourceFile(g.srcFileUrl);

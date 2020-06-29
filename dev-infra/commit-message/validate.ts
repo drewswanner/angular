@@ -1,12 +1,19 @@
 /**
  * @license
- * Copyright Google Inc. All Rights Reserved.
+ * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import {getAngularDevConfig} from '../utils/config';
-import {CommitMessageConfig} from './config';
+import {error} from '../utils/console';
+
+import {getCommitMessageConfig} from './config';
+
+/** Options for commit message validation. */
+export interface ValidateCommitMessageOptions {
+  disallowSquash?: boolean;
+  nonFixupCommitHeaders?: string[];
+}
 
 const FIXUP_PREFIX_RE = /^fixup! /i;
 const GITHUB_LINKING_RE = /((closed?s?)|(fix(es)?(ed)?)|(resolved?s?))\s\#(\d+)/ig;
@@ -14,7 +21,7 @@ const SQUASH_PREFIX_RE = /^squash! /i;
 const REVERT_PREFIX_RE = /^revert:? /i;
 const TYPE_SCOPE_RE = /^(\w+)(?:\(([^)]+)\))?\:\s(.+)$/;
 const COMMIT_HEADER_RE = /^(.*)/i;
-const COMMIT_BODY_RE = /^.*\n\n(.*)/i;
+const COMMIT_BODY_RE = /^.*\n\n([\s\S]*)$/;
 
 /** Parse a full commit message into its composite parts. */
 export function parseCommitMessage(commitMsg: string) {
@@ -26,17 +33,17 @@ export function parseCommitMessage(commitMsg: string) {
   let subject = '';
 
   if (COMMIT_HEADER_RE.test(commitMsg)) {
-    header = COMMIT_HEADER_RE.exec(commitMsg) ![1]
+    header = COMMIT_HEADER_RE.exec(commitMsg)![1]
                  .replace(FIXUP_PREFIX_RE, '')
                  .replace(SQUASH_PREFIX_RE, '');
   }
   if (COMMIT_BODY_RE.test(commitMsg)) {
-    body = COMMIT_BODY_RE.exec(commitMsg) ![1];
+    body = COMMIT_BODY_RE.exec(commitMsg)![1];
     bodyWithoutLinking = body.replace(GITHUB_LINKING_RE, '');
   }
 
   if (TYPE_SCOPE_RE.test(header)) {
-    const parsedCommitHeader = TYPE_SCOPE_RE.exec(header) !;
+    const parsedCommitHeader = TYPE_SCOPE_RE.exec(header)!;
     type = parsedCommitHeader[1];
     scope = parsedCommitHeader[2];
     subject = parsedCommitHeader[3];
@@ -54,12 +61,11 @@ export function parseCommitMessage(commitMsg: string) {
   };
 }
 
-
 /** Validate a commit message against using the local repo's config. */
 export function validateCommitMessage(
-    commitMsg: string, disallowSquash: boolean = false, nonFixupCommitHeaders?: string[]) {
-  function error(errorMessage: string) {
-    console.error(
+    commitMsg: string, options: ValidateCommitMessageOptions = {}) {
+  function printError(errorMessage: string) {
+    error(
         `INVALID COMMIT MSG: \n` +
         `${'─'.repeat(40)}\n` +
         `${commitMsg}\n` +
@@ -71,62 +77,88 @@ export function validateCommitMessage(
         `<type>(<scope>): <subject>\n\n<body>`);
   }
 
-  const config = getAngularDevConfig<'commitMessage', CommitMessageConfig>().commitMessage;
+  const config = getCommitMessageConfig().commitMessage;
   const commit = parseCommitMessage(commitMsg);
 
+  ////////////////////////////////////
+  // Checking revert, squash, fixup //
+  ////////////////////////////////////
+
+  // All revert commits are considered valid.
   if (commit.isRevert) {
     return true;
   }
 
-  if (commit.isSquash && disallowSquash) {
-    error('The commit must be manually squashed into the target commit');
-    return false;
+  // All squashes are considered valid, as the commit will be squashed into another in
+  // the git history anyway, unless the options provided to not allow squash commits.
+  if (commit.isSquash) {
+    if (options.disallowSquash) {
+      printError('The commit must be manually squashed into the target commit');
+      return false;
+    }
+    return true;
   }
 
-  // If it is a fixup commit and `nonFixupCommitHeaders` is not empty, we only care to check whether
-  // there is a corresponding non-fixup commit (i.e. a commit whose header is identical to this
-  // commit's header after stripping the `fixup! ` prefix).
-  if (commit.isFixup && nonFixupCommitHeaders) {
-    if (!nonFixupCommitHeaders.includes(commit.header)) {
-      error(
+  // Fixups commits are considered valid, unless nonFixupCommitHeaders are provided to check
+  // against. If `nonFixupCommitHeaders` is not empty, we check whether there is a corresponding
+  // non-fixup commit (i.e. a commit whose header is identical to this commit's header after
+  // stripping the `fixup! ` prefix), otherwise we assume this verification will happen in another
+  // check.
+  if (commit.isFixup) {
+    if (options.nonFixupCommitHeaders && !options.nonFixupCommitHeaders.includes(commit.header)) {
+      printError(
           'Unable to find match for fixup commit among prior commits: ' +
-          (nonFixupCommitHeaders.map(x => `\n      ${x}`).join('') || '-'));
+          (options.nonFixupCommitHeaders.map(x => `\n      ${x}`).join('') || '-'));
       return false;
     }
 
     return true;
   }
 
+  ////////////////////////////
+  // Checking commit header //
+  ////////////////////////////
   if (commit.header.length > config.maxLineLength) {
-    error(`The commit message header is longer than ${config.maxLineLength} characters`);
+    printError(`The commit message header is longer than ${config.maxLineLength} characters`);
     return false;
   }
 
   if (!commit.type) {
-    error(`The commit message header does not match the expected format.`);
+    printError(`The commit message header does not match the expected format.`);
     return false;
   }
 
   if (!config.types.includes(commit.type)) {
-    error(`'${commit.type}' is not an allowed type.\n => TYPES: ${config.types.join(', ')}`);
+    printError(`'${commit.type}' is not an allowed type.\n => TYPES: ${config.types.join(', ')}`);
     return false;
   }
 
   if (commit.scope && !config.scopes.includes(commit.scope)) {
-    error(`'${commit.scope}' is not an allowed scope.\n => SCOPES: ${config.scopes.join(', ')}`);
+    printError(
+        `'${commit.scope}' is not an allowed scope.\n => SCOPES: ${config.scopes.join(', ')}`);
     return false;
   }
 
-  if (commit.bodyWithoutLinking.trim().length < config.minBodyLength) {
-    error(
-        `The commit message body does not meet the minimum length of ${config.minBodyLength} characters`);
+  // Commits with the type of `release` do not require a commit body.
+  if (commit.type === 'release') {
+    return true;
+  }
+
+  //////////////////////////
+  // Checking commit body //
+  //////////////////////////
+
+  if (!config.minBodyLengthTypeExcludes?.includes(commit.type) &&
+      commit.bodyWithoutLinking.trim().length < config.minBodyLength) {
+    printError(`The commit message body does not meet the minimum length of ${
+        config.minBodyLength} characters`);
     return false;
   }
 
   const bodyByLine = commit.body.split('\n');
   if (bodyByLine.some(line => line.length > config.maxLineLength)) {
-    error(
-        `The commit messsage body contains lines greater than ${config.maxLineLength} characters`);
+    printError(
+        `The commit message body contains lines greater than ${config.maxLineLength} characters`);
     return false;
   }
 
