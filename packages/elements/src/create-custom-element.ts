@@ -18,6 +18,8 @@ import {createCustomEvent, getComponentInputs, getDefaultAttributeToPropertyInpu
  * that can be used for custom element registration. Implemented and returned
  * by the {@link createCustomElement createCustomElement() function}.
  *
+ * @see [Angular Elements Overview](guide/elements "Turning Angular components into custom elements")
+ *
  * @publicApi
  */
 export interface NgElementConstructor<P> {
@@ -115,6 +117,8 @@ export interface NgElementConfig {
  * static property to affect all newly created instances, or as a constructor argument for
  * one-off creations.
  *
+ * @see [Angular Elements Overview](guide/elements "Turning Angular components into custom elements")
+ *
  * @param component The component to transform.
  * @param config A configuration that provides initialization information to the created class.
  * @returns The custom-element construction class, which can be registered with
@@ -187,13 +191,30 @@ export function createCustomElement<P>(
     }
 
     connectedCallback(): void {
+      // For historical reasons, some strategies may not have initialized the `events` property
+      // until after `connect()` is run. Subscribe to `events` if it is available before running
+      // `connect()` (in order to capture events emitted suring inittialization), otherwise
+      // subscribe afterwards.
+      //
+      // TODO: Consider deprecating/removing the post-connect subscription in a future major version
+      //       (e.g. v11).
+
+      let subscribedToEvents = false;
+
+      if (this.ngElementStrategy.events) {
+        // `events` are already available: Subscribe to it asap.
+        this.subscribeToEvents();
+        subscribedToEvents = true;
+      }
+
       this.ngElementStrategy.connect(this);
 
-      // Listen for events from the strategy and dispatch them as custom events
-      this.ngElementEventsSubscription = this.ngElementStrategy.events.subscribe(e => {
-        const customEvent = createCustomEvent(this.ownerDocument!, e.name, e.value);
-        this.dispatchEvent(customEvent);
-      });
+      if (!subscribedToEvents) {
+        // `events` were not initialized before running `connect()`: Subscribe to them now.
+        // The events emitted during the component initialization have been missed, but at least
+        // future events will be captured.
+        this.subscribeToEvents();
+      }
     }
 
     disconnectedCallback(): void {
@@ -206,6 +227,14 @@ export function createCustomElement<P>(
         this.ngElementEventsSubscription.unsubscribe();
         this.ngElementEventsSubscription = null;
       }
+    }
+
+    private subscribeToEvents(): void {
+      // Listen for events from the strategy and dispatch them as custom events.
+      this.ngElementEventsSubscription = this.ngElementStrategy.events.subscribe(e => {
+        const customEvent = createCustomEvent(this.ownerDocument!, e.name, e.value);
+        this.dispatchEvent(customEvent);
+      });
     }
   }
 

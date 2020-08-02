@@ -189,9 +189,75 @@
               "tooltip": "Property binding helps show app data in the UI."
             },
             {
-              "url": "guide/template-syntax",
               "title": "Template Syntax",
-              "tooltip": "Learn how to write templates that display data and consume user events with the help of data binding."
+              "tooltip": "Syntax to use in templates for binding, expressions, and directives.",
+              "children": [
+                {
+                  "url": "guide/template-syntax",
+                  "title": "Introduction",
+                  "tooltip": "Introduction to writing templates that display data and consume user events with the help of data binding."
+                },
+                {
+                  "url": "guide/interpolation",
+                  "title": "Interpolation",
+                  "tooltip": "An introduction to interpolation and expressions in HTML."
+                },
+                {
+                  "url": "guide/template-statements",
+                  "title": "Template statements",
+                  "tooltip": "Introductory guide to statements in templates that respond to events that components, directives, or elements raise."
+                },
+                {
+                  "url": "guide/binding-syntax",
+                  "title": "Binding syntax",
+                  "tooltip": "Introductory guide to coordinating app values."
+                },
+                {
+                  "url": "guide/property-binding",
+                  "title": "Property binding",
+                  "tooltip": "Introductory guide to setting element or input properties."
+                },
+                {
+                  "url": "guide/attribute-binding",
+                  "title": "Attribute, class, and style bindings",
+                  "tooltip": "Introductory guide to setting the value of HTML attributes."
+                },
+                {
+                  "url": "guide/event-binding",
+                  "title": "Event binding",
+                  "tooltip": "Introductory guide to listening for user interaction."
+                },
+                {
+                  "url": "guide/two-way-binding",
+                  "title": "Two-way binding",
+                  "tooltip": "Introductory guide to sharing data between a class and a template."
+                },
+                {
+                  "url": "guide/built-in-directives",
+                  "title": "Built-in directives",
+                  "tooltip": "Introductory guide to some of the most popular built-in directives."
+                },
+                {
+                  "url": "guide/template-reference-variables",
+                  "title": "Template reference variables",
+                  "tooltip": "Introductory guide to referring to DOM elements within a template."
+                },
+                {
+                  "url": "guide/inputs-outputs",
+                  "title": "Inputs and Outputs",
+                  "tooltip": "Introductory guide to sharing data between parent and child directives or components."
+                },
+                {
+                  "url": "guide/template-expression-operators",
+                  "title": "Template expression operators",
+                  "tooltip": "Introductory guide to transforming data, ensuring safe navigation, and guarding against null variables in templates."
+                },
+                {
+                  "url": "guide/svg-in-templates",
+                  "title": "SVG in templates",
+                  "tooltip": "Guide to using SVGs as templates to create interactive graphics."
+                }
+              ]
             },
             {
               "url": "guide/user-input",
@@ -506,85 +572,6 @@
           "url": "guide/universal",
           "title": "Server-side Rendering",
           "tooltip": "Render HTML server-side with Angular Universal."
-        },
-        {
-          "title": "Upgrading from AngularJS",
-          "tooltip": "Incrementally upgrade an AngularJS application to Angular.",
-          "children": [
-            {
-              "url": "guide/upgrade-setup",
-              "title": "Setup for Upgrading from AngularJS",
-              "tooltip": "Use code from the Angular QuickStart seed as part of upgrading from AngularJS.",
-              "hidden": true
-            },
-            {
-              "url": "guide/upgrade",
-              "title": "Upgrading Instructions",
-              "tooltip": "Incrementally upgrade an AngularJS application to Angular."
-            },
-            {
-              "url": "guide/upgrade-performance",
-              "title": "Upgrading for Performance",
-              "tooltip": "Upgrade from AngularJS to Angular in a more flexible way."
-            },
-            {
-              "url": "guide/ajs-quick-reference",
-              "title": "AngularJS-Angular Concepts",
-              "tooltip": "Learn how AngularJS concepts and techniques map to Angular."
-            }
-          ]
-        },
-        {
-          "title": "Angular Libraries",
-          "tooltip": "Extending Angular with shared libraries.",
-          "children": [
-            {
-              "url": "guide/libraries",
-              "title": "Libraries Overview",
-              "tooltip": "Understand how and when to use or create libraries."
-            },
-            {
-              "url": "guide/using-libraries",
-              "title": "Using Published Libraries",
-              "tooltip": "Integrate published libraries into an app."
-            },
-            {
-              "url": "guide/creating-libraries",
-              "title": "Creating Libraries",
-              "tooltip": "Extend Angular by creating, publishing, and using your own libraries."
-            },
-            {
-              "url": "guide/lightweight-injection-tokens",
-              "title": "Lightweight Injection Tokens for Libraries",
-              "tooltip": "Optimize client app size by designing library services with lightweight injection tokens."
-            }
-          ]
-        },
-        {
-          "title": "Schematics",
-          "tooltip": "Using CLI schematics for code generation.",
-          "children": [
-            {
-              "url": "guide/schematics",
-              "title": "Schematics Overview",
-              "tooltip": "How the CLI uses schematics to generate code."
-            },
-            {
-              "url": "guide/schematics-authoring",
-              "title": "Authoring Schematics",
-              "tooltip": "Understand the structure of a schematic."
-            },
-            {
-              "url": "guide/schematics-for-libraries",
-              "title": "Schematics for Libraries",
-              "tooltip": "Use schematics to integrate your library with the Angular CLI."
-            }
-          ]
-        },
-        {
-          "url": "guide/cli-builder",
-          "title": "CLI Builders",
-          "tooltip": "Using builders to customize Angular CLI."
         }
       ]
     },
@@ -605,28 +592,74 @@
               "url": "guide/angular-compiler-options",
               "title": "Angular Compiler Options",
               "tooltip": "Configuring AOT compilation."
-           },
-           {
+            },
+            {
               "url": "guide/aot-metadata-errors",
               "title": "AOT Metadata Errors",
               "tooltip": "Troubleshooting AOT compilation."
-           },
-           {
-            "url": "guide/template-typecheck",
-            "title": "Template Type-checking",
-            "tooltip": "Template type-checking in Angular."
-         }
-        ]
-      },
+            },
+            {
+              "url": "guide/template-typecheck",
+              "title": "Template Type-checking",
+              "tooltip": "Template type-checking in Angular."
+            }
+          ]
+        },
         {
           "url": "guide/build",
           "title": "Building & Serving",
           "tooltip": "Building and serving Angular apps."
         },
         {
-          "url": "guide/testing",
           "title": "Testing",
-          "tooltip": "Techniques and practices for testing an Angular app."
+          "tooltip": "Testing your Angular apps.",
+          "children": [
+            {
+              "url": "guide/testing",
+              "title": "Intro to Testing",
+              "tooltip": "Introduction to testing an Angular app."
+            },
+            {
+              "url": "guide/testing-code-coverage",
+              "title": "Code Coverage",
+              "tooltip": "Determine how much of your code is tested."
+            },
+            {
+              "url": "guide/testing-services",
+              "title": "Testing Services",
+              "tooltip": "How to test services."
+            },
+            {
+              "url": "guide/testing-components-basics",
+              "title": "Basics of Testing Components",
+              "tooltip": "The fundamentals of how to test components."
+            },
+            {
+              "url": "guide/testing-components-scenarios",
+              "title": "Component Testing Scenarios",
+              "tooltip": "Use cases for testing components."
+            },
+            {
+              "url": "guide/testing-attribute-directives",
+              "title": "Testing Attribute Directives",
+              "tooltip": "How to test attribute directives."
+            },
+            {
+              "url": "guide/testing-pipes",
+              "title": "Testing Pipes",
+              "tooltip": "Writing tests for pipes."
+            },
+            {
+              "url": "guide/test-debugging",
+              "title": "Debugging Tests",
+              "tooltip": "How to debug tests."
+            },
+            {
+              "url": "guide/testing-utility-apis",
+              "title": "Testing Utility APIs",
+              "tooltip": "Features of the Angular testing utilities."
+            }
+          ]
         },
         {
           "url": "guide/deployment",
@@ -710,6 +743,11 @@
               "url": "guide/creating-libraries",
               "title": "Creating Libraries",
               "tooltip": "Extend Angular by creating, publishing, and using your own libraries."
+            },
+            {
+              "url": "guide/lightweight-injection-tokens",
+              "title": "Lightweight Injection Tokens for Libraries",
+              "tooltip": "Optimize client app size by designing library services with lightweight injection tokens."
             }
           ]
         },
@@ -746,9 +784,20 @@
       "tooltip": "End-to-end tutorials for learning Angular concepts and patterns.",
       "children": [
         {
-          "url": "guide/router-tutorial",
-          "title": "Using Angular Routes in a Single-page Application",
-          "tooltip": "A tutorial that covers many patterns associated with Angular routing."
+          "title": "Routing",
+          "tooltip": "End-to-end tutorials for learning about Angular's router.",
+          "children": [
+            {
+              "url": "guide/router-tutorial",
+              "title": "Using Angular Routes in a Single-page Application",
+              "tooltip": "A tutorial that covers many patterns associated with Angular routing."
+            },
+            {
+              "url": "guide/router-tutorial-toh",
+              "title": "Router tutorial: tour of heroes",
+              "tooltip": "Explore how to use Angular's router. Based on the Tour of Heroes example."
+            }
+          ]
         },
         {
           "url": "guide/forms",
